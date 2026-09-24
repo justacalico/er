@@ -16,6 +16,8 @@ esac
 APPDIR="$(mktemp -d)/er.AppDir"
 mkdir -p "$APPDIR"
 cp -a "$BUNDLE_DIR/." "$APPDIR/"
+# appimagetool wants a desktop file named after the binary
+cp "$APPDIR/com.httpanimations.er.desktop" "$APPDIR/er.desktop"
 
 cat > "$APPDIR/AppRun" <<'RUN'
 #!/bin/sh

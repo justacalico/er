@@ -1,5 +1,9 @@
 # er (二)
 
+[![pipeline](https://gitlab.com/HttpAnimations/er/badges/main/pipeline.svg)](https://gitlab.com/HttpAnimations/er/-/pipelines)
+[![release](https://gitlab.com/HttpAnimations/er/-/badges/release.svg)](https://gitlab.com/HttpAnimations/er/-/releases)
+[![landing page](https://img.shields.io/badge/site-er--7708c3.gitlab.io-2DD4BF)](https://er-7708c3.gitlab.io)
+
 Run the same Flatpak app multiple times, fully isolated. Each instance gets its
 own home directory, its own `~/.var/app/<id>` data, and its own D-Bus session
 bus, so apps that normally refuse a second window happily run side by side.

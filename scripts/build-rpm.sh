@@ -59,13 +59,13 @@ mkdir -p %{buildroot}/opt/er %{buildroot}/usr/bin
 mkdir -p %{buildroot}/usr/share/applications %{buildroot}/usr/share/icons/hicolor/1024x1024/apps
 cp -a %{bundle_dir}/. %{buildroot}/opt/er/
 ln -sf /opt/er/er %{buildroot}/usr/bin/er
-cp %{bundle_dir}/er.desktop %{buildroot}/usr/share/applications/
+cp %{bundle_dir}/com.httpanimations.er.desktop %{buildroot}/usr/share/applications/
 cp %{bundle_dir}/er.png %{buildroot}/usr/share/icons/hicolor/1024x1024/apps/
 
 %files
 /opt/er
 /usr/bin/er
-/usr/share/applications/er.desktop
+/usr/share/applications/com.httpanimations.er.desktop
 /usr/share/icons/hicolor/1024x1024/apps/er.png
 EOF
 
