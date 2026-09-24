@@ -5,7 +5,7 @@ skip_ci = "[skip ci]"
 skip_untracked = false
 
 pre_bump_hooks = [
-  "sed -i -E 's/^version:.*/version: {{version}}/' pubspec.yaml",
+  "sed -i -E 's/^version:.*/version: {{version}}+1/' pubspec.yaml",
 ]
 
 [commit_types]
@@ -33,6 +33,6 @@ repository = "er"
 # syncs the tag to GitHub where the release build runs.
 [bump_profiles.ci]
 pre_bump_hooks = [
-  "sed -i -E 's/^version:.*/version: {{version}}/' pubspec.yaml",
+  "sed -i -E 's/^version:.*/version: {{version}}+1/' pubspec.yaml",
 ]
 post_bump_hooks = []
