@@ -31,10 +31,11 @@ class LandingPage extends StatelessWidget {
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 720),
-          child: ListView(
-            shrinkWrap: true,
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
-            children: [
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               const Text('er 二',
                   style: TextStyle(
                       fontSize: 72,
@@ -93,7 +94,8 @@ class LandingPage extends StatelessWidget {
                     'No daemon, no root, no config files. Pick an app, name the '
                     'instance, hit launch.',
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

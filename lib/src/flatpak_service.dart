@@ -14,10 +14,11 @@ class FlatpakService {
   final String hostHome;
   final String instancesRoot;
 
-  static String dataDir() {
-    final xdg = Platform.environment['XDG_DATA_HOME'];
+  static String dataDir([Map<String, String>? env]) {
+    env ??= Platform.environment;
+    final xdg = env['XDG_DATA_HOME'];
     if (xdg != null && xdg.isNotEmpty) return '$xdg/er';
-    return '${Platform.environment['HOME']}/.local/share/er';
+    return '${env['HOME']}/.local/share/er';
   }
 
   static const extraHomeBinds = [
@@ -80,6 +81,7 @@ class FlatpakService {
   List<String> launchArgv(
     AppInstance inst, {
     List<String> appArgs = const [],
+    List<String>? extraBinds,
   }) {
     final inner = [
       if (inst.privateBus) ...['dbus-run-session', '--'],
@@ -92,7 +94,7 @@ class FlatpakService {
     if (inst.isolateHome) {
       argv.addAll(['bwrap', '--dev-bind', '/', '/']);
       argv.addAll(['--bind', inst.home, hostHome]);
-      for (final dir in _hostExtraBinds()) {
+      for (final dir in extraBinds ?? _hostExtraBinds()) {
         final rel = dir.substring(hostHome.length + 1);
         final rw = rel == '.local/share/flatpak';
         argv.addAll([rw ? '--bind' : '--ro-bind', dir, '$hostHome/$rel']);
@@ -103,9 +105,9 @@ class FlatpakService {
     return argv;
   }
 
-  void ensureInstanceDirs(AppInstance inst) {
+  void ensureInstanceDirs(AppInstance inst, {List<String>? extraBinds}) {
     Directory(inst.home).createSync(recursive: true);
-    for (final dir in _hostExtraBinds()) {
+    for (final dir in extraBinds ?? _hostExtraBinds()) {
       final rel = dir.substring(hostHome.length + 1);
       Directory('${inst.home}/$rel').createSync(recursive: true);
     }
@@ -125,12 +127,16 @@ class FlatpakService {
     return proc.runSync('kill', ['-0', '--', '-$pgid']).exitCode == 0;
   }
 
-  Future<void> stop(AppInstance inst) async {
+  Future<void> stop(
+    AppInstance inst, {
+    int attempts = 30,
+    Duration pollInterval = const Duration(milliseconds: 100),
+  }) async {
     final pgid = inst.pgid;
     if (pgid == null) return;
     proc.runSync('kill', ['-TERM', '--', '-$pgid']);
-    for (var i = 0; i < 30 && isRunning(inst); i++) {
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+    for (var i = 0; i < attempts && isRunning(inst); i++) {
+      await Future<void>.delayed(pollInterval);
     }
     if (isRunning(inst)) {
       proc.runSync('kill', ['-KILL', '--', '-$pgid']);
