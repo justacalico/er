@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v0.1.1](https://gitlab.com/HttpAnimations/er/compare/eeef471cda2dcb58ffbdf1972bbb9483df24d135..v0.1.1) - 2026-09-24
+#### Bug Fixes
+- 实际应用版本解析与构建号保留修改 - ([8a2197b](https://gitlab.com/HttpAnimations/er/commit/8a2197b67c07c057894d714a3d7a7f5a9fa137e4)) - calico
+- 兼容无构建号的版本解析并保留 pubspec 构建号 - ([eeef471](https://gitlab.com/HttpAnimations/er/commit/eeef471cda2dcb58ffbdf1972bbb9483df24d135)) - calico
+
+- - -
+
 ## [v0.1.0](https://gitlab.com/HttpAnimations/er/compare/796b2fbbdf345541700b2c8b7b8a5cdf365a1e1d..v0.1.0) - 2026-09-24
 #### Features
 - 添加应用图标 - ([b0d1e3e](https://gitlab.com/HttpAnimations/er/commit/b0d1e3e4a8c677f90960502d1d02de25506e6c83)) - calico
