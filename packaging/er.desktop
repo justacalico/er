@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=er
+Comment=Run the same flatpak multiple times in isolated instances
+Exec=er
+Icon=er
+Categories=Utility;
+Terminal=false
