@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v0.2.0](https://gitlab.com/HttpAnimations/er/compare/9b7c2086e408c6d3966679b24c05258f3acf3374..v0.2.0) - 2026-09-24
+#### Features
+- 打包窗口图标并更新仓库元信息 - ([9b7c208](https://gitlab.com/HttpAnimations/er/commit/9b7c2086e408c6d3966679b24c05258f3acf3374)) - calico
+
+- - -
+
 ## [v0.1.1](https://gitlab.com/HttpAnimations/er/compare/eeef471cda2dcb58ffbdf1972bbb9483df24d135..v0.1.1) - 2026-09-24
 #### Bug Fixes
 - 实际应用版本解析与构建号保留修改 - ([8a2197b](https://gitlab.com/HttpAnimations/er/commit/8a2197b67c07c057894d714a3d7a7f5a9fa137e4)) - calico
