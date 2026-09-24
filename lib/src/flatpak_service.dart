@@ -145,8 +145,10 @@ class FlatpakService {
 
   void wipeInstance(AppInstance inst) {
     final dir = Directory(inst.home).parent;
-    if (dir.path.startsWith(instancesRoot) && dir.existsSync()) {
-      dir.deleteSync(recursive: true);
-    }
+    if (!dir.path.startsWith(instancesRoot) || !dir.existsSync()) return;
+    // Sandboxed apps can drop read-only files (mocktail's APK payload does),
+    // so make everything writable before deleting.
+    proc.runSync('chmod', ['-R', 'u+w', dir.path]);
+    dir.deleteSync(recursive: true);
   }
 }

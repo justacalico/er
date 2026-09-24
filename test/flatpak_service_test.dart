@@ -170,14 +170,18 @@ void main() {
   test('wipeInstance only deletes inside instances root', () {
     final root = Directory.systemTemp.createTempSync('er');
     addTearDown(() => root.deleteSync(recursive: true));
-    final s = svc(FakeProc(), root.path);
+    final p = FakeProc();
+    final s = svc(p, root.path);
     final i = inst(root.path);
     s.ensureInstanceDirs(i, extraBinds: []);
     s.wipeInstance(i);
+    expect(p.calls.single, startsWith('chmod -R u+w'));
     expect(Directory(i.home).parent.existsSync(), isFalse);
 
+    p.calls.clear();
     final outside = inst('/tmp');
     s.wipeInstance(outside);
     expect(Directory('/tmp').existsSync(), isTrue);
+    expect(p.calls, isEmpty);
   });
 }
