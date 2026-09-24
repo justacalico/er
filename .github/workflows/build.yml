@@ -178,7 +178,7 @@ jobs:
             OUT_ARCH=x86_64
           fi
           BUNDLE="build/linux/$LINUX_ARCH/release/bundle"
-          cp packaging/er.desktop linux/er.png "$BUNDLE/"
+          cp packaging/com.httpanimations.er.desktop linux/er.png "$BUNDLE/"
           tar -czf "$ARTIFACTS_DIR/er-linux-$OUT_ARCH.tar.gz" -C "$BUNDLE" .
           (cd "$BUNDLE" && zip -r "$ARTIFACTS_DIR/er-linux-$OUT_ARCH.zip" . >/dev/null)
           pkgdir="$GITHUB_WORKSPACE/er-linux-$OUT_ARCH-deb"
@@ -187,7 +187,7 @@ jobs:
             "$pkgdir/usr/share/applications" "$pkgdir/usr/share/icons/hicolor/1024x1024/apps"
           cp -r "$BUNDLE/." "$pkgdir/opt/er/"
           ln -sf /opt/er/er "$pkgdir/usr/bin/er"
-          cp packaging/er.desktop "$pkgdir/usr/share/applications/"
+          cp packaging/com.httpanimations.er.desktop "$pkgdir/usr/share/applications/"
           cp linux/er.png "$pkgdir/usr/share/icons/hicolor/1024x1024/apps/er.png"
           {
             echo "Package: er"

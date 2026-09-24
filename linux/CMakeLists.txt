@@ -108,6 +108,8 @@ endforeach(bundled_library)
 
 # Copy the native assets provided by the build.dart from all packages.
 set(NATIVE_ASSETS_DIR "${PROJECT_BUILD_DIR}native_assets/linux/")
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/er.png" DESTINATION "${CMAKE_INSTALL_PREFIX}"
+  COMPONENT Runtime)
 install(DIRECTORY "${NATIVE_ASSETS_DIR}"
    DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
    COMPONENT Runtime)
