@@ -32,6 +32,8 @@ class InstanceStore {
       ));
   }
 
+  Iterable<MapEntry<String, List<AppInstance>>> get entries => _byApp.entries;
+
   List<AppInstance> forApp(String appId) => _byApp[appId] ??= [];
 
   void remove(String appId, String name) {

@@ -23,6 +23,7 @@ class AppInstance {
     required this.home,
     this.privateBus = true,
     this.isolateHome = true,
+    this.temporary = false,
     this.pgid,
   });
 
@@ -31,6 +32,7 @@ class AppInstance {
   final String home;
   bool privateBus;
   bool isolateHome;
+  bool temporary;
   int? pgid;
 
   Map<String, dynamic> toJson() => {
@@ -39,6 +41,7 @@ class AppInstance {
         'home': home,
         'privateBus': privateBus,
         'isolateHome': isolateHome,
+        'temporary': temporary,
         if (pgid != null) 'pgid': pgid,
       };
 
@@ -48,6 +51,7 @@ class AppInstance {
         home: json['home'] as String,
         privateBus: json['privateBus'] as bool? ?? true,
         isolateHome: json['isolateHome'] as bool? ?? true,
+        temporary: json['temporary'] as bool? ?? false,
         pgid: json['pgid'] as int?,
       );
 }

@@ -30,7 +30,24 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _store.load();
+    _sweepTemps();
     _refreshApps();
+  }
+
+  // Drop temp instances left behind by a previous run (e.g. er was killed
+  // while one was up). Ones still running stay listed so they can be
+  // stopped, which wipes them.
+  void _sweepTemps() {
+    var changed = false;
+    for (final entry in _store.entries.toList()) {
+      for (final inst in entry.value.toList()) {
+        if (!inst.temporary || _service.isRunning(inst)) continue;
+        _service.wipeInstance(inst);
+        _store.remove(entry.key, inst.name);
+        changed = true;
+      }
+    }
+    if (changed) _store.save();
   }
 
   Future<void> _refreshApps() async {
@@ -72,29 +89,70 @@ class _HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+  Future<void> _runTemp() async {
+    final app = _selected;
+    if (app == null) return;
+    final taken = _store.forApp(app.id).map((i) => i.name).toSet();
+    var n = 1;
+    while (taken.contains('temp $n')) {
+      n++;
+    }
+    final inst = AppInstance(
+      appId: app.id,
+      name: 'temp $n',
+      home: _service.instanceHome(app.id, 'temp $n'),
+      temporary: true,
+    );
+    setState(() => _store.forApp(app.id).add(inst));
+    try {
+      await _service.launch(inst, onExit: () => _reapTemp(inst));
+      _store.save();
+    } catch (e) {
+      _store.remove(app.id, inst.name);
+      _snack('Launch failed: $e');
+    }
+    setState(() {});
+  }
+
+  // A temp instance only exists while its process does; wipe it once the
+  // process exits on its own.
+  void _reapTemp(AppInstance inst) {
+    _service.wipeInstance(inst);
+    _store.remove(inst.appId, inst.name);
+    _store.save();
+    if (mounted) setState(() {});
+  }
+
   Future<void> _stop(AppInstance inst) async {
     await _service.stop(inst);
+    if (inst.temporary) {
+      _service.wipeInstance(inst);
+      _store.remove(inst.appId, inst.name);
+      _store.save();
+    }
     setState(() {});
   }
 
   Future<void> _delete(AppInstance inst) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Delete "${inst.name}"?'),
-        content:
-            const Text('The instance and all of its data will be removed.'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel')),
-          FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Delete')),
-        ],
-      ),
-    );
-    if (confirm != true) return;
+    if (!inst.temporary) {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('Delete "${inst.name}"?'),
+          content:
+              const Text('The instance and all of its data will be removed.'),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('Cancel')),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text('Delete')),
+          ],
+        ),
+      );
+      if (confirm != true) return;
+    }
     await _service.stop(inst);
     _service.wipeInstance(inst);
     setState(() => _store.remove(inst.appId, inst.name));
@@ -164,27 +222,44 @@ class _HomePageState extends State<HomePage> {
       children: [
         Padding(
           padding: const EdgeInsets.all(16),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AppIcon(app: app, size: 52),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(app.name,
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.w700)),
-                    Text('${app.id} · ${app.version}',
-                        style: const TextStyle(
-                            fontSize: 12, color: Color(0xFF9BA7B4))),
-                  ],
-                ),
+              Row(
+                children: [
+                  AppIcon(app: app, size: 52),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(app.name,
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.w700)),
+                        Text('${app.id} · ${app.version}',
+                            style: const TextStyle(
+                                fontSize: 12, color: Color(0xFF9BA7B4))),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              FilledButton.icon(
-                onPressed: _addInstance,
-                icon: const Icon(Icons.add),
-                label: const Text('New instance'),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  FilledButton.tonalIcon(
+                    onPressed: _runTemp,
+                    icon: const Icon(Icons.bolt),
+                    label: const Text('Run once'),
+                  ),
+                  FilledButton.icon(
+                    onPressed: _addInstance,
+                    icon: const Icon(Icons.add),
+                    label: const Text('New instance'),
+                  ),
+                ],
               ),
             ],
           ),

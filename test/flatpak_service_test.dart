@@ -92,6 +92,29 @@ void main() {
     expect(s.iconFor(app), endsWith('128x128/org.b.Two.png'));
   });
 
+  test('iconFor returns null on unreadable desktop file', () {
+    final root = Directory.systemTemp.createTempSync('er');
+    addTearDown(() => root.deleteSync(recursive: true));
+    final desktop = File(
+        '${root.path}/sys/app/org.a.One/current/active/export/share/'
+        'applications/org.a.One.desktop')
+      ..createSync(recursive: true);
+    Process.runSync('chmod', ['000', desktop.path]);
+    final s = FlatpakService(
+        proc: FakeProc(),
+        hostHome: '${root.path}/home',
+        instancesRoot: '${root.path}/inst',
+        systemFlatpakDir: '${root.path}/sys',
+        hostIconDirs: []);
+    final app = FlatpakApp(
+        id: 'org.a.One',
+        name: 'One',
+        version: '',
+        origin: '',
+        installation: 'system');
+    expect(s.iconFor(app), isNull);
+  });
+
   test('iconFor returns null when no icon exists', () {
     final root = Directory.systemTemp.createTempSync('er');
     addTearDown(() => root.deleteSync(recursive: true));
@@ -222,6 +245,20 @@ void main() {
     expect(i.pgid, 777);
     expect(p.calls.single, startsWith('setsid bwrap'));
     expect(Directory(i.home).existsSync(), isTrue);
+  });
+
+  test('launch onExit fires when the process exits', () async {
+    final root = Directory.systemTemp.createTempSync('er');
+    addTearDown(() => root.deleteSync(recursive: true));
+    final spawned = FakeProcess(4242);
+    final p = FakeProc()..onStart = (e, a) => spawned;
+    final s = svc(p, root.path, '/nonexistent-home');
+    var exited = false;
+    await s.launch(inst(root.path), onExit: () => exited = true);
+    expect(exited, isFalse);
+    spawned.kill();
+    await Future<void>.delayed(Duration.zero);
+    expect(exited, isTrue);
   });
 
   test('isRunning checks process group', () {
