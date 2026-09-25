@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v0.3.0](https://gitlab.com/HttpAnimations/er/compare/86835a72b5d23fd8a2b9a95c77f1bb4653f3dfb6..v0.3.0) - 2026-09-25
+#### Features
+- 新增一键运行临时实例按钮 - ([e6edea4](https://gitlab.com/HttpAnimations/er/commit/e6edea43d54c883b73800a7c6618e7f3734f352b)) - HttpAnimations
+- 应用列表显示 Flatpak 图标 - ([86835a7](https://gitlab.com/HttpAnimations/er/commit/86835a72b5d23fd8a2b9a95c77f1bb4653f3dfb6)) - HttpAnimations
+
+- - -
+
 ## [v0.2.0](https://gitlab.com/HttpAnimations/er/compare/9b7c2086e408c6d3966679b24c05258f3acf3374..v0.2.0) - 2026-09-24
 #### Features
 - 打包窗口图标并更新仓库元信息 - ([9b7c208](https://gitlab.com/HttpAnimations/er/commit/9b7c2086e408c6d3966679b24c05258f3acf3374)) - calico
