@@ -37,6 +37,98 @@ void main() {
     expect(out[1].version, '');
   });
 
+  test('iconFor reads Icon= and prefers raster over svg', () {
+    final root = Directory.systemTemp.createTempSync('er');
+    addTearDown(() => root.deleteSync(recursive: true));
+    final deploy =
+        '${root.path}/sys/app/org.a.One/current/active';
+    File('$deploy/export/share/applications/org.a.One.desktop')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('[Desktop Entry]\n'
+          'Name=One\n'
+          'Icon=one-icon\n'
+          '[Desktop Action x]\n'
+          'Icon=wrong\n');
+    File('$deploy/export/share/icons/hicolor/48x48/apps/one-icon.png')
+        .createSync(recursive: true);
+    File('$deploy/export/share/icons/hicolor/scalable/apps/one-icon.svg')
+        .createSync(recursive: true);
+    final s = FlatpakService(
+        proc: FakeProc(),
+        hostHome: '${root.path}/home',
+        instancesRoot: '${root.path}/inst',
+        systemFlatpakDir: '${root.path}/sys',
+        hostIconDirs: []);
+    final app = FlatpakApp(
+        id: 'org.a.One',
+        name: 'One',
+        version: '',
+        origin: '',
+        installation: 'system');
+    expect(s.iconFor(app), endsWith('48x48/apps/one-icon.png'));
+  });
+
+  test('iconFor uses appstream cache and largest size', () {
+    final root = Directory.systemTemp.createTempSync('er');
+    addTearDown(() => root.deleteSync(recursive: true));
+    final deploy =
+        '${root.path}/sys/app/org.b.Two/current/active';
+    File('$deploy/files/share/app-info/icons/flatpak/64x64/org.b.Two.png')
+        .createSync(recursive: true);
+    File('$deploy/files/share/app-info/icons/flatpak/128x128/org.b.Two.png')
+        .createSync(recursive: true);
+    final s = FlatpakService(
+        proc: FakeProc(),
+        hostHome: '${root.path}/home',
+        instancesRoot: '${root.path}/inst',
+        systemFlatpakDir: '${root.path}/sys',
+        hostIconDirs: []);
+    final app = FlatpakApp(
+        id: 'org.b.Two',
+        name: 'Two',
+        version: '',
+        origin: '',
+        installation: 'system');
+    expect(s.iconFor(app), endsWith('128x128/org.b.Two.png'));
+  });
+
+  test('iconFor returns null when no icon exists', () {
+    final root = Directory.systemTemp.createTempSync('er');
+    addTearDown(() => root.deleteSync(recursive: true));
+    final s = FlatpakService(
+        proc: FakeProc(),
+        hostHome: '${root.path}/home',
+        instancesRoot: '${root.path}/inst',
+        systemFlatpakDir: '${root.path}/sys',
+        hostIconDirs: []);
+    final app = FlatpakApp(
+        id: 'org.c.Three',
+        name: 'Three',
+        version: '',
+        origin: '',
+        installation: 'system');
+    expect(s.iconFor(app), isNull);
+  });
+
+  test('listApps fills iconPath', () async {
+    final root = Directory.systemTemp.createTempSync('er');
+    addTearDown(() => root.deleteSync(recursive: true));
+    File('${root.path}/sys/app/org.a.One/current/active/files/share/'
+            'app-info/icons/flatpak/64x64/org.a.One.png')
+        .createSync(recursive: true);
+    final p = FakeProc();
+    p.onRun = (e, a) =>
+        ProcessResult(0, 0, 'org.a.One\tApp One\t1\tf\ts\n', '');
+    final s = FlatpakService(
+        proc: p,
+        hostHome: '${root.path}/home',
+        instancesRoot: '${root.path}/inst',
+        systemFlatpakDir: '${root.path}/sys',
+        hostIconDirs: []);
+    final apps = await s.listApps();
+    expect(apps.single.iconPath, endsWith('org.a.One.png'));
+  });
+
   test('slug normalizes names', () {
     expect(FlatpakService.slug('My Alt 2'), 'my-alt-2');
     expect(FlatpakService.slug('!!!'), 'instance');

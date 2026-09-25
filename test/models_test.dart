@@ -32,7 +32,7 @@ void main() {
   });
 
   test('FlatpakApp holds fields', () {
-    const a = FlatpakApp(
+    final a = FlatpakApp(
         id: 'i', name: 'n', version: 'v', origin: 'o', installation: 's');
     expect(a.id, 'i');
     expect(a.installation, 's');

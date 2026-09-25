@@ -8,11 +8,21 @@ class FlatpakService {
     required this.proc,
     required this.hostHome,
     required this.instancesRoot,
-  });
+    this.systemFlatpakDir = '/var/lib/flatpak',
+    List<String>? hostIconDirs,
+  }) : hostIconDirs = hostIconDirs ??
+            [
+              '$hostHome/.local/share/icons',
+              '$hostHome/.icons',
+              '/usr/share/icons',
+              '/usr/share/pixmaps',
+            ];
 
   final Proc proc;
   final String hostHome;
   final String instancesRoot;
+  final String systemFlatpakDir;
+  final List<String> hostIconDirs;
 
   static String dataDir([Map<String, String>? env]) {
     env ??= Platform.environment;
@@ -36,7 +46,11 @@ class FlatpakService {
         '--columns=application,name,version,origin,installation',
       ]);
       if (result.exitCode != 0) return [];
-      return parseAppList(result.stdout as String);
+      final apps = parseAppList(result.stdout as String);
+      for (final app in apps) {
+        app.iconPath = iconFor(app);
+      }
+      return apps;
     } on ProcessException {
       return [];
     }
@@ -57,6 +71,107 @@ class FlatpakService {
       ));
     }
     return apps;
+  }
+
+  static const _iconExts = ['png', 'jpg', 'jpeg', 'webp', 'svg'];
+
+  String? iconFor(FlatpakApp app) {
+    try {
+      return _resolveIcon(app);
+    } on FileSystemException {
+      return null;
+    }
+  }
+
+  String? _resolveIcon(FlatpakApp app) {
+    final names = {_desktopIconName(app.id) ?? app.id, app.id};
+    for (final name in names) {
+      if (name.startsWith('/') && File(name).existsSync()) return name;
+    }
+    String? best;
+    var bestScore = -1;
+    for (final dir in _iconSearchDirs(app.id)) {
+      for (final name in names) {
+        for (final ext in _iconExts) {
+          if (!File('$dir/$name.$ext').existsSync()) continue;
+          final score = _iconScore(dir, ext);
+          if (score > bestScore) {
+            bestScore = score;
+            best = '$dir/$name.$ext';
+          }
+        }
+      }
+    }
+    return best;
+  }
+
+  String? _desktopIconName(String appId) {
+    for (final path in _desktopFiles(appId)) {
+      final f = File(path);
+      if (!f.existsSync()) continue;
+      var inEntry = false;
+      for (final line in f.readAsLinesSync()) {
+        final l = line.trim();
+        if (l.startsWith('[')) {
+          inEntry = l == '[Desktop Entry]';
+          continue;
+        }
+        if (inEntry && l.startsWith('Icon=')) return l.substring(5).trim();
+      }
+    }
+    return null;
+  }
+
+  Iterable<String> _desktopFiles(String appId) sync* {
+    for (final root in [_userFlatpakDir, systemFlatpakDir]) {
+      yield '$root/exports/share/applications/$appId.desktop';
+      yield '$root/app/$appId/current/active/export/share/applications/$appId.desktop';
+    }
+  }
+
+  List<String> _iconSearchDirs(String appId) {
+    final dirs = <String>[];
+    for (final root in [_userFlatpakDir, systemFlatpakDir]) {
+      dirs.addAll(_themeSizeDirs('$root/exports/share/icons'));
+      final deploy = '$root/app/$appId/current/active';
+      dirs.addAll(_themeSizeDirs('$deploy/export/share/icons'));
+      dirs.addAll(_themeSizeDirs('$deploy/files/share/app-info/icons'));
+    }
+    for (final root in hostIconDirs) {
+      dirs.addAll(_themeSizeDirs(root));
+    }
+    return dirs;
+  }
+
+  // Returns the root itself plus every <theme>/<size>[/apps] pair, so both
+  // icon-theme layouts and flat dirs like /usr/share/pixmaps are covered.
+  static List<String> _themeSizeDirs(String root) {
+    final base = Directory(root);
+    if (!base.existsSync()) return [];
+    final dirs = <String>[root];
+    for (final theme in base.listSync()) {
+      if (theme is! Directory) continue;
+      for (final size in theme.listSync()) {
+        if (size is! Directory) continue;
+        dirs.add('${size.path}/apps');
+        dirs.add(size.path);
+      }
+    }
+    return dirs;
+  }
+
+  // Raster wins over svg (which Image.file can't decode); bigger size wins.
+  static int _iconScore(String dir, String ext) {
+    var seg = dir.split('/').last;
+    if (seg == 'apps') seg = dir.split('/').reversed.elementAt(1);
+    var size = 0;
+    final m = RegExp(r'^(\d+)x\d+(?:@(\d+))?$').firstMatch(seg);
+    if (m != null) {
+      size = int.parse(m.group(1)!) * (int.tryParse(m.group(2) ?? '') ?? 1);
+    } else if (seg == 'scalable') {
+      size = 1 << 16;
+    }
+    return size + (ext == 'svg' ? 0 : 1 << 20);
   }
 
   static String slug(String name) {
