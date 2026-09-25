@@ -17,17 +17,25 @@ void main() {
     expect(back.appId, 'a');
     expect(back.privateBus, isFalse);
     expect(back.isolateHome, isFalse);
+    expect(back.temporary, isFalse);
     expect(back.pgid, 9);
+  });
+
+  test('AppInstance temporary roundtrips', () {
+    final i = AppInstance(appId: 'a', name: 'n', home: '/h', temporary: true);
+    expect(AppInstance.fromJson(i.toJson()).temporary, isTrue);
   });
 
   test('AppInstance defaults and null pgid', () {
     final i = AppInstance(appId: 'a', name: 'n', home: '/h');
     expect(i.privateBus, isTrue);
     expect(i.isolateHome, isTrue);
+    expect(i.temporary, isFalse);
     expect(i.toJson().containsKey('pgid'), isFalse);
     final back = AppInstance.fromJson(
         {'appId': 'a', 'name': 'n', 'home': '/h'});
     expect(back.privateBus, isTrue);
+    expect(back.temporary, isFalse);
     expect(back.pgid, isNull);
   });
 

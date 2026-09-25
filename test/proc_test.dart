@@ -2,7 +2,7 @@ import 'package:er/src/proc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  const p = SystemProc();
+  final p = SystemProc();
 
   test('run returns output', () async {
     final r = await p.run('echo', ['hi']);

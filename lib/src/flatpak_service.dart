@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'models.dart';
@@ -228,11 +229,18 @@ class FlatpakService {
     }
   }
 
-  Future<int> launch(AppInstance inst, {List<String> appArgs = const []}) async {
+  Future<int> launch(
+    AppInstance inst, {
+    List<String> appArgs = const [],
+    void Function()? onExit,
+  }) async {
     ensureInstanceDirs(inst);
     final argv = launchArgv(inst, appArgs: appArgs);
     final process = await proc.start(argv.first, argv.sublist(1));
     inst.pgid = process.pid;
+    if (onExit != null) {
+      unawaited(process.exitCode.then((_) => onExit()));
+    }
     return process.pid;
   }
 

@@ -32,6 +32,7 @@ class FakeProcess implements Process {
 
 class FakeProc implements Proc {
   final calls = <String>[];
+  final spawned = <FakeProcess>[];
   ProcessResult Function(String exe, List<String> args)? onRun;
   ProcessResult Function(String exe, List<String> args)? onRunSync;
   Process Function(String exe, List<String> args)? onStart;
@@ -51,6 +52,8 @@ class FakeProc implements Proc {
   @override
   Future<Process> start(String exe, List<String> args) async {
     calls.add('$exe ${args.join(' ')}');
-    return onStart?.call(exe, args) ?? FakeProcess(4242);
+    final p = onStart?.call(exe, args) ?? FakeProcess(4242);
+    if (p is FakeProcess) spawned.add(p);
+    return p;
   }
 }

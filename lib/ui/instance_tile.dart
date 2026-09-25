@@ -28,6 +28,7 @@ class InstanceTile extends StatelessWidget {
         title: Text(instance.name),
         subtitle: Text(
           [
+            if (instance.temporary) 'temporary',
             if (instance.isolateHome) 'isolated home' else 'shared home',
             if (instance.privateBus) 'private bus' else 'shared bus',
           ].join(' · '),
