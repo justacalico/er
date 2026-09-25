@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../src/flatpak_service.dart';
 import '../src/instance_store.dart';
 import '../src/models.dart';
+import 'app_icon.dart';
 import 'instance_tile.dart';
 import 'new_instance_sheet.dart';
 import 'theme.dart';
@@ -141,6 +142,7 @@ class _HomePageState extends State<HomePage> {
         return ListTile(
           dense: true,
           selected: app.id == _selected?.id,
+          leading: AppIcon(app: app, size: 32),
           title: Text(app.name, overflow: TextOverflow.ellipsis),
           subtitle: Text(app.id,
               style: const TextStyle(fontSize: 11),
@@ -164,6 +166,8 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
+              AppIcon(app: app, size: 52),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,10 +1,11 @@
 class FlatpakApp {
-  const FlatpakApp({
+  FlatpakApp({
     required this.id,
     required this.name,
     required this.version,
     required this.origin,
     required this.installation,
+    this.iconPath,
   });
 
   final String id;
@@ -12,6 +13,7 @@ class FlatpakApp {
   final String version;
   final String origin;
   final String installation;
+  String? iconPath;
 }
 
 class AppInstance {

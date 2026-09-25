@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:er/app.dart';
 import 'package:er/src/flatpak_service.dart';
 import 'package:er/src/instance_store.dart';
+import 'package:er/ui/app_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -44,6 +45,12 @@ void main() {
     await t.tap(find.text('App Two'));
     await t.pumpAndSettle();
     expect(find.text('org.b.Two · 2.0'), findsOneWidget);
+  });
+
+  testWidgets('app icons fall back to a letter tile', (t) async {
+    await pumpApp(t);
+    expect(find.byType(AppIcon), findsNWidgets(3));
+    expect(find.text('A'), findsNWidgets(3));
   });
 
   testWidgets('empty state when no flatpaks', (t) async {
