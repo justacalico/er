@@ -229,6 +229,29 @@ class FlatpakService {
     }
   }
 
+  // Instances are laid out as <slug>/<name>/home; the pgid file sits next to
+  // the home dir so it never leaks into the instance's fake home.
+  String pgidFilePath(AppInstance inst) {
+    final parent = inst.home.substring(0, inst.home.length - '/home'.length);
+    return '${parent}er.pgid';
+  }
+
+  static Future<int> readPgidFile(
+    String path, {
+    int attempts = 100,
+    Duration pollInterval = const Duration(milliseconds: 20),
+  }) async {
+    for (var i = 0; i < attempts; i++) {
+      final file = File(path);
+      if (file.existsSync()) {
+        final pgid = int.tryParse(file.readAsStringSync().trim());
+        if (pgid != null) return pgid;
+      }
+      await Future<void>.delayed(pollInterval);
+    }
+    throw StateError('timed out waiting for pgid file $path');
+  }
+
   Future<int> launch(
     AppInstance inst, {
     List<String> appArgs = const [],
@@ -236,8 +259,13 @@ class FlatpakService {
   }) async {
     ensureInstanceDirs(inst);
     final argv = launchArgv(inst, appArgs: appArgs);
-    final process = await proc.start(argv.first, argv.sublist(1));
-    inst.pgid = process.pid;
+    final pgidFile = proc.needsPgidFile ? pgidFilePath(inst) : null;
+    if (pgidFile != null && File(pgidFile).existsSync()) {
+      File(pgidFile).deleteSync();
+    }
+    final process =
+        await proc.start(argv.first, argv.sublist(1), pgidFile: pgidFile);
+    inst.pgid = pgidFile == null ? process.pid : await readPgidFile(pgidFile);
     if (onExit != null) {
       unawaited(process.exitCode.then((_) => onExit()));
     }

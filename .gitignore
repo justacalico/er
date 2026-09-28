@@ -48,3 +48,6 @@ key.properties
 android/key.properties
 .env*
 coverage/
+.flatpak-builder/
+.flatpak-staging.*/
+flatpak-repo/

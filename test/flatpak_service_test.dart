@@ -247,6 +247,62 @@ void main() {
     expect(Directory(i.home).existsSync(), isTrue);
   });
 
+  test('launch reads the pgid back from a file when sandboxed', () async {
+    final root = Directory.systemTemp.createTempSync('er');
+    addTearDown(() => root.deleteSync(recursive: true));
+    late final FakeProc p;
+    p = FakeProc()
+      ..needsPgidFile = true
+      ..onStart = (e, a) {
+        File(p.lastPgidFile!).writeAsStringSync('31337\n');
+        return FakeProcess(999);
+      };
+    final s = svc(p, root.path, '/nonexistent-home');
+    final i = inst(root.path);
+    await s.launch(i);
+    expect(i.pgid, 31337);
+    expect(p.lastPgidFile, s.pgidFilePath(i));
+  });
+
+  test('launch deletes a stale pgid file before spawning', () async {
+    final root = Directory.systemTemp.createTempSync('er');
+    addTearDown(() => root.deleteSync(recursive: true));
+    late final FakeProc p;
+    p = FakeProc()
+      ..needsPgidFile = true
+      ..onStart = (e, a) {
+        expect(File(p.lastPgidFile!).existsSync(), isFalse);
+        File(p.lastPgidFile!).writeAsStringSync('7\n');
+        return FakeProcess(1);
+      };
+    final s = svc(p, root.path, '/nonexistent-home');
+    final i = inst(root.path);
+    Directory(i.home).createSync(recursive: true);
+    File(s.pgidFilePath(i)).writeAsStringSync('old');
+    await s.launch(i);
+    expect(i.pgid, 7);
+  });
+
+  test('readPgidFile waits for the file and fails after attempts', () async {
+    final root = Directory.systemTemp.createTempSync('er');
+    addTearDown(() => root.deleteSync(recursive: true));
+    final path = '${root.path}/x/er.pgid';
+    File(path)
+      ..createSync(recursive: true)
+      ..writeAsStringSync('42\n');
+    expect(await FlatpakService.readPgidFile(path, pollInterval: Duration.zero),
+        42);
+    await expectLater(
+        FlatpakService.readPgidFile('${root.path}/missing',
+            attempts: 2, pollInterval: Duration.zero),
+        throwsStateError);
+    final bad = File('${root.path}/bad')..writeAsStringSync('notanint');
+    await expectLater(
+        FlatpakService.readPgidFile(bad.path,
+            attempts: 2, pollInterval: Duration.zero),
+        throwsStateError);
+  });
+
   test('launch onExit fires when the process exits', () async {
     final root = Directory.systemTemp.createTempSync('er');
     addTearDown(() => root.deleteSync(recursive: true));
