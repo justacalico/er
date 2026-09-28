@@ -172,6 +172,18 @@ pages:
       curl -fsSL -H "JOB-TOKEN: $CI_JOB_TOKEN" -o /tmp/web.tar.gz \
         "$CI_SERVER_URL/api/v4/projects/$CI_PROJECT_ID/packages/generic/release-assets/$TAG/web.tar.gz"
       tar -xzf /tmp/web.tar.gz -C public
+    - |
+      TAG="${RELEASE_TAG:-nightly}"
+      if curl -fsSL -H "JOB-TOKEN: $CI_JOB_TOKEN" -o /tmp/flatpak-repo.tar.gz \
+        "$CI_SERVER_URL/api/v4/projects/$CI_PROJECT_ID/packages/generic/release-assets/$TAG/flatpak-repo.tar.gz"; then
+        mkdir -p public/flatpak/repo
+        tar -xzf /tmp/flatpak-repo.tar.gz -C public/flatpak/repo
+        PAGES_URL="${CI_PAGES_URL:-https://er-7708c3.gitlab.io}"
+        printf '[Flatpak Ref]\nName=com.httpanimations.er\nBranch=stable\nTitle=er\nUrl=%s/flatpak/repo\nIsRuntime=false\nRuntimeRepo=https://flathub.org/repo/flathub.flatpakrepo\n' \
+          "$PAGES_URL" > public/flatpak/er.flatpakref
+      else
+        echo "No flatpak-repo.tar.gz in release $TAG, skipping flatpak repo"
+      fi
   artifacts:
     paths:
       - public

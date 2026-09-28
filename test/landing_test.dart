@@ -18,7 +18,7 @@ void main() {
     await t.pump();
   });
 
-  test('stub bootstrap returns the landing app', () {
-    expect(buildApp(), isA<LandingApp>());
+  test('stub bootstrap returns the landing app', () async {
+    expect(await buildApp(), isA<LandingApp>());
   });
 }

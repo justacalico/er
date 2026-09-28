@@ -30,9 +30,19 @@ network, devices) is shared.
 Requires `flatpak`, `bubblewrap`, and `dbus-run-session` (all standard on a
 Flatpak-capable Linux system).
 
+When er itself is installed as a flatpak it detects the sandbox and runs the
+same pipeline through `flatpak-spawn --host`, so instances behave identically
+to the native build.
+
 ## Install
 
-Download the latest release for your architecture from the
+The easiest way is the flatpak repo hosted on GitLab Pages:
+
+```
+flatpak install https://er-7708c3.gitlab.io/flatpak/er.flatpakref
+```
+
+Or download the latest release for your architecture from the
 [releases page](https://gitlab.com/HttpAnimations/er/-/releases) (tar.gz, zip,
 .deb, .rpm, or AppImage) and run `er`.
 

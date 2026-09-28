@@ -2,4 +2,4 @@ import 'package:flutter/material.dart';
 
 import '../landing.dart';
 
-Widget buildApp() => const LandingApp();
+Future<Widget> buildApp() async => const LandingApp();

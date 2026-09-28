@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.httpanimations.er</id>
+  <name>er</name>
+  <summary>Run the same flatpak multiple times in isolated instances</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0-only</project_license>
+  <description>
+    <p>
+      Run the same Flatpak app multiple times, fully isolated. Each instance
+      gets its own home directory, its own per-app data, and its own D-Bus
+      session bus, so apps that normally refuse a second window happily run
+      side by side.
+    </p>
+  </description>
+  <launchable type="desktop-id">com.httpanimations.er.desktop</launchable>
+  <url type="homepage">https://gitlab.com/HttpAnimations/er</url>
+  <provides>
+    <binary>er</binary>
+  </provides>
+  <content_rating type="oars-1.1"/>
+</component>

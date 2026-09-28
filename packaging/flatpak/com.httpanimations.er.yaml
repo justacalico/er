@@ -1,0 +1,49 @@
+app-id: com.httpanimations.er
+runtime: org.gnome.Platform
+runtime-version: '49'
+sdk: org.gnome.Sdk
+command: er
+finish-args:
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --share=ipc
+  - --device=dri
+  # Everything er does (flatpak, bwrap, setsid, dbus-run-session, kill)
+  # happens on the host through flatpak-spawn.
+  - --talk-name=org.freedesktop.Flatpak
+  - --filesystem=xdg-data/er:create
+  - --filesystem=xdg-data/flatpak
+  - --filesystem=xdg-data/fonts:ro
+  - --filesystem=xdg-data/icons:ro
+  - --filesystem=~/.fonts:ro
+  - --filesystem=~/.icons:ro
+  - --filesystem=~/.themes:ro
+  - --filesystem=/var/lib/flatpak:ro
+modules:
+  - name: er
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 er /app/er/er
+      - install -Dm644 er.png /app/er/er.png
+      - cp -r lib data /app/er/
+      - mkdir -p /app/bin
+      - ln -s /app/er/er /app/bin/er
+      - install -Dm644 com.httpanimations.er.desktop
+        /app/share/applications/com.httpanimations.er.desktop
+      - install -Dm644 icon-512.png
+        /app/share/icons/hicolor/512x512/apps/com.httpanimations.er.png
+      - install -Dm644 icon-128.png
+        /app/share/icons/hicolor/128x128/apps/com.httpanimations.er.png
+      - install -Dm644 com.httpanimations.er.metainfo.xml
+        /app/share/metainfo/com.httpanimations.er.metainfo.xml
+    sources:
+      - type: dir
+        path: bundle
+      - type: file
+        path: com.httpanimations.er.desktop
+      - type: file
+        path: icon-512.png
+      - type: file
+        path: icon-128.png
+      - type: file
+        path: com.httpanimations.er.metainfo.xml
