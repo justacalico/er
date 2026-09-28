@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v0.4.0](https://gitlab.com/HttpAnimations/er/compare/c2da7bb6c5a72cac9e08afe09dd646300a698c2a..v0.4.0) - 2026-09-28
+#### Features
+- 支持以 Flatpak 打包自身并在 GitLab Pages 托管 flatpak 仓库 - ([c2da7bb](https://gitlab.com/HttpAnimations/er/commit/c2da7bb6c5a72cac9e08afe09dd646300a698c2a)) - HttpAnimations
+
+- - -
+
 ## [v0.3.0](https://gitlab.com/HttpAnimations/er/compare/86835a72b5d23fd8a2b9a95c77f1bb4653f3dfb6..v0.3.0) - 2026-09-25
 #### Features
 - 新增一键运行临时实例按钮 - ([e6edea4](https://gitlab.com/HttpAnimations/er/commit/e6edea43d54c883b73800a7c6618e7f3734f352b)) - HttpAnimations
